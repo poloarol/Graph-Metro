@@ -1,22 +1,33 @@
 import java.io.*;
 import java.util.*;
 
+import net.datastructures.AdjacencyMapGraph;
+import net.datastructures.Dijkstra;
+import net.datastructures.Edge;
+import net.datastructures.Graph;
+import net.datastructures.GraphAlgorithms;
+import net.datastructures.Map;
+import net.datastructures.Vertex;
+
 public class Metro{
 
- private Map<String,Station> map;
- ArrayList<Route> a;
- ArrayList<Station> b;
+ private Map<Integer,Vertex> vertices;
+ private ArrayList<Route> a;
+ private ArrayList<Station> b;
+ private Graph<Integer,Station> graph;
  //ArrayList<Transfer> c;
- Station station, depart, end;
- Route transit;
- StringTokenizer token;
- String line;
- String number, name, start, stop, time, transfer;
- int count = 0;
+ private Station station, depart, end;
+ private Route transit;
+ private StringTokenizer token;
+ private String line;
+ private String number, name, start, stop, time, transfer;
+ private int count = 0;
+
 
  public Metro(){
   a = new ArrayList<Route>();
   b = new ArrayList<Station>();
+  graph = new AdjacencyMapGraph<Integer,Station>(false);
  }
 
  private void createStation(int stationNumber, String stationName){
@@ -46,6 +57,30 @@ public class Metro{
   // private method which takes in a string and returns a number
   return Integer.parseInt(s);
  }
+
+ private void buildGraph(){
+  vertices = new HashMap<Integer,Vertex>();
+  for(){
+   int k = transit.getTime();
+   Vertex<Station> dv = vertices.get(transit.getSource());
+   if(dv == null){
+    // source vertex not in graph -- insert
+    graph.insertVertex(dv);
+    vertices.put(transit.getSource().getStationNumber(),dv);
+   }
+   Vertex<Station> dx = vertices.get(transit.getDestination());
+   if(dx == null){
+    // destination vertex not in graph -- insert
+    dx = graph.insertVertex(dx);
+    vertices.put(transit.getDestination().gegetStationNumber(),dv);
+   }
+   // check if edge is already in graph
+   if(graph.getEdge(dv, dx) == null){
+    Edge<Station> e = graph.insertEdge(dv,dx,time);
+   }
+  }
+ }
+
 
  public ArrayList<Route> readMetro (String fileName) throws Exception, IOException{
 
