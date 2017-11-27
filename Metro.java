@@ -1,92 +1,45 @@
 import java.io.*;
 import java.util.*;
-import net.datastructures.*;
 
 public class Metro{
 
- private Map<String,Station> map = new HashMap<String,Station>();
- // File which reads the metro.txt file
- private Graph<String,Integer> graph;
+ private Map<String,Station> map;
+ ArrayList<Route> a;
+ ArrayList<Station> b;
+ //ArrayList<Transfer> c;
+ Station station, depart, end;
+ Route transit;
+ StringTokenizer token;
+ String line;
+ String number, name, start, stop, time, transfer;
+ int count = 0;
 
- private ArrayList<Travel> print (String fileName) throws Exception, IOException{
-  // prints all info on file i.e. station names, start, stop, time
-  ArrayList<Travel> a = new ArrayList<Travel>();
-  ArrayList<Station> b = new ArrayList<Station>();
-  //ArrayList<Transfer> c = new ArrayList<Transfer>();
-
-  Station station, depart, end;
-  Transfer transfer;
-  Travel travel;
-  StringTokenizer token;
-  String line;
-  String number, name, start, stop, time, change, numberOfStations, numberOfTransits;
-  int count = 0;
-
-  BufferedReader metro = new BufferedReader(new FileReader(fileName));
-  metro.readLine(); // this read the first read line
-  while((line = metro.readLine()) != null){
-   // starts from second read line
-
-   if(line.contains("$"))
-    count++;
-
-   if(!line.contains("$")){
-    token = new StringTokenizer(line);
-    if(count == 0){
-     number = token.nextToken();
-     name = token.nextToken();
-     station = new Station(getNumber(number),name);
-     //System.out.println(station.toString());
-     b.add(getNumber(number),station);
-    }
-    if(count == 1){
-     start = token.nextToken();
-     depart = b.get(getNumber(start));
-     stop = token.nextToken();
-     end = b.get(getNumber(stop));
-     time = token.nextToken();
-     travel = new Travel(depart,end,getNumber(time));
-     a.add(travel);
-     //System.out.println(travel.toString());
-    }
-    if(count == 2){
-     start = token.nextToken();
-     depart = b.get(getNumber(start));
-     stop = token.nextToken();
-     end = b.get(getNumber(stop));
-     change = token.nextToken();
-     placeTransfer(depart,end);
-     transfer = new Transfer(depart, end, getNumber(change));
-     //System.out.println(transfer.toString());
-    }
-   }
-  }
-  return a;
+ public Metro(){
+  a = new ArrayList<Route>();
+  b = new ArrayList<Station>();
  }
 
-  public Metro(String fileName){
-   graph = new AdjacencyMapGraph<String,Integer>();
-   print(fileName);
-   readMetro(fileName);
-  }
-
- public void readMetro(String fileName) throws Exception, IOException{
-  BufferedReader graph = new BufferedReader(new FileReader());
-
-  String line;
-  int count = 0;
-  StringTokenizer token;
-  while((line = graph.readLine()) != null){
-    if(line.contains("$"))
-     count++;
-    if(!line.contains("$"){
-
-    }
-   }
-  }
-
+ private void createStation(int stationNumber, String stationName){
+  station = new Station(stationNumber,stationName);
+  b.add(stationNumber,station);
  }
 
+ private void createRoute(int stationStart, int stationStop, int secs){
+  depart = b.get(stationStart);
+  end = b.get(stationStop);
+  transit = new Route(depart,end,secs);
+ }
+
+ private void placeTransfer(int stationStart, int stationStop, int transfer){
+  depart = b.get(stationStart);
+  end = b.get(stationStop);
+  if(!depart.hasTransfer()){
+   depart.setTransfer(-1);
+  }
+  if(!end.hasTransfer()){
+   end.setTransfer(-1);
+  }
+  depart.addTransfer(end);
  }
 
  private int getNumber(String s){
@@ -94,23 +47,44 @@ public class Metro{
   return Integer.parseInt(s);
  }
 
- private void placeTransfer(Station a, Station b){
-  // private method which takes in two stations and places the transfer mark on them
-  if(!a.hasTransfer()){
-   a.setTransfer(-1);
-  }
-  if(!b.hasTransfer()){
-   b.setTransfer(-1);
-  }
-  a.addTransfer(b);
- }
+ public ArrayList<Route> readMetro (String fileName) throws Exception, IOException{
 
- public static void main(String[] args) throws IOException, Exception {
-  Metro metro = new Metro();
-  ArrayList<Travel> f = metro.read("metro.txt");
-  for (int i=0; i< f.size(); i++) {
-   //System.out.println(f.get(i).toString());
+  BufferedReader metro = new BufferedReader(new FileReader(fileName));
+  metro.readLine(); // this read the first read line
+  while((line = metro.readLine()) != null){
+   // starts from second read line
+   token = new StringTokenizer(line);
+
+   if(line.contains("$"))
+    count++;
+
+   if(!line.contains("$")){
+    token = new StringTokenizer(line);
+     if(count == 0){
+      number = token.nextToken();
+      name = token.nextToken();
+      createStation(getNumber(number),name);
+     }else if(count == 1){
+      start = token.nextToken();
+      stop = token.nextToken();
+      time = token.nextToken();
+      if(getNumber(time) == -1){
+       placeTransfer(getNumber(start), getNumber(stop), getNumber(time));
+      }else{
+       createRoute(getNumber(start), getNumber(stop), getNumber(time));
+      }
+     }
+    }
+   }
+   return a;
   }
- }
+
+  public static void main(String[] args) throws IOException, Exception {
+   Metro metro = new Metro();
+   ArrayList<Route> f = metro.readMetro("metro.txt");
+   for (int i=0; i< f.size(); i++) {
+    //System.out.println(f.get(i).toString());
+   }
+  }
 
 }
