@@ -14,8 +14,10 @@ public class DijkstraAlgorithm<V> {
 
 
 	public void DijkstraAlgorithm() { 
+		// nothing to be done in constructor
 	}
 	
+	public<V> ShortestPathsInfo findShortestPaths(Vertex<V> source,  AdjacencyListGraph<V, Integral> graph) {
 		
 		int sourceIndex=graph.getPositionOfVertex(source);
 		ShortestPathsInfo path = new ShortestPathsInfo(sourceIndex,graph.numVertices());
