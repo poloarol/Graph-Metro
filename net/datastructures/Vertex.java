@@ -22,8 +22,6 @@
  */
 package net.datastructures;
 
-import java.util.Hashtable;
-
 /**
  * A vertex of a graph.
  *
@@ -31,7 +29,7 @@ import java.util.Hashtable;
  * @author Roberto Tamassia
  * @author Michael H. Goldwasser
  */
-public interface Vertex<V>{//extends DecorablePosition<V>{//extends Position<V>, Map<Object,Object>{ //extends DecorablePosition<E>
+public interface Vertex<V> {
   /** Returns the element associated with the vertex. */
   V getElement();
 }

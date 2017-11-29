@@ -41,7 +41,7 @@ public class Station{
  }
 
  public boolean equals(Station station){
-  return station.getStationName().equals(this.getStationName());
+  return this.station == station.getStationNumber();
  }
 
  public boolean hasTransfer(){
