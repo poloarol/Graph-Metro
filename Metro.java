@@ -10,28 +10,43 @@ public class Metro{
  private ArrayList<Route> a;
  private ArrayList<Station> b;
  private Graph<Station,Integer> graph;
- private Hashtable<Station, Vertex> vertices, hash;
- //ArrayList<Transfer> c;
+ private Hashtable<Station, Vertex> vertices;
  private Station station, depart, end;
  private Route transit;
  private StringTokenizer token;
  private String line;
- private String number, name, start, stop, time, transfer;
- private int count;
+ private String number, name, start, stop, time;
 
  public Metro(String fileName) throws Exception, IOException{
   a = new ArrayList<Route>();
   b = new ArrayList<Station>();
   vertices = new Hashtable<Station,Vertex>();
   graph = new AdjacencyMapGraph<Station,Integer>(true);
-  count = 0;
   readMetro(fileName);
  }
+
+ /*
+
+  Private method which allows the creation of stations
+  @params
+   stationNumber : Integer identifying the station
+   stationName : String which is the name of the station
+
+ */
 
  private void createStation(int stationNumber, String stationName){
   station = new Station(stationNumber,stationName);
   b.add(stationNumber,station);
  }
+
+ /*
+
+  Private method which serves the purpose of cresting routes between stations
+  @params
+   stationStart : Station where the transit begins
+   stationStop : Station where the transit ends
+
+ */
 
  private void createRoute(int stationStart, int stationStop, int secs){
   int i = 0;
@@ -41,6 +56,16 @@ public class Metro{
   a.add(i,transit);
   i++;
  }
+
+ /*
+
+  Private method which indicates transfers between identical stations.
+  This stations vary by their station # but not station name
+  @params
+   stationStart : Arrival station in transit
+   stationStop : Station which serves as transfer for transit
+
+ */
 
  private void placeTransfer(int stationStart, int stationStop){
   depart = b.get(stationStart);
@@ -59,6 +84,11 @@ public class Metro{
   return Integer.parseInt(s);
  }
 
+ /**
+  * Helper routine to get a Vertex (Position) from a string naming
+  * the vertex
+  */
+
  protected Vertex<Station> getVertex(Station s) throws Exception{
   for(Vertex<Station> vs : graph.vertices()){
    if(s.equals(vs.getElement())){
@@ -67,6 +97,10 @@ public class Metro{
   }
   throw new Exception("Vertex not in graph");
  }
+
+ /** Helper method:
+  * Read a String representing a vertex from the console
+  */
 
  public static String readVertex() throws IOException{
   System.out.print("[Input] Vertex: ");
@@ -85,6 +119,13 @@ public class Metro{
    System.out.println(es.getElement());
   }
  }
+
+ /**
+
+  Private method which serves in the building of a graph by creating adjacent vertexes
+  and linking them through the use of edges
+
+ */
 
  private void buildGraph(Station start, Station stop, int time){
 
@@ -107,7 +148,15 @@ public class Metro{
   }
  }
 
+ /**
+
+  method which takes the start and stop number of two stations and
+  determines the fastest path to get to the stop station from the start station
+
+ */
+
  public void uniformCostSearch(int start, int stop) throws Exception{
+
 
   Stack<Vertex> sk = new LinkedStack<Vertex>();
   Vertex<Station> source = getVertex(b.get(start));
@@ -116,18 +165,58 @@ public class Metro{
   GraphAlgorithms dj = new GraphAlgorithms();
   Map<Vertex<Station>,Integer> result = dj.shortestPathLengths(graph,source);
 
-  Iterable<Edge<Integer>> e = graph.outgoingEdges(source);
-  for(Edge<Integer> v : e){
-   if((e.getElement() == 90) && (b.get(start) != b.get(stop)){
-    System.out.println(v.getElement());
-    sk.push(graph.opposite(source, v));
-   }
-  }
-  uniformCostSearch(sk,getVertex(b.get(stop)));
+  Stack<Vertex> neighbours = getAllNeighbours(source);
+
+  uniformCostSearch(sk, neighbours, getVertex(b.get(stop)));
  }
 
- private void uniformCostSearch(Stack k,Vertex<Station> b){
+ private Stack<Vertex> getAllNeighbours(Vertex<Station> s){
+  Stack<Vertex> n = new LinkedStack();
+  Iterable<Edge<Integer>> e = graph.outgoingEdges(s);
+  for(Edge<Integer> v : e){
+   if(v.getElement() != 90)
+    n.push(graph.opposite(s,v));
+  }
+  return n;
+ }
 
+
+ /**
+  recurisve method which takes in a stack containing the neighbours
+  of a start vertex and finds the shortest path to get to the stop vertex
+  and return a Stack of vertexes to the path
+ */
+
+ private Stack<Vertex> uniformCostSearch(Stack<Vertex> s, Stack<Vertex> t, Vertex<Station> stop){
+  // while popping the Stack
+  // check to find the shortest path between each adjacent station to the stop
+  // place all its neighbours in the stack and repeat
+  int shortest = 0;
+
+  while(!t.isEmpty()){
+
+   Vertex<Station> source = t.pop();
+
+   if(source.equals(goal))
+    break;
+
+   GraphAlgorithms dj = new GraphAlgorithms();
+   Map<Vertex<Station>,Integer> result = dj.shortestPathLengths(graph,source);
+
+   for(Vertex<Station> goal : graph.vertices()){
+    shortest = goal.getElement();
+    if(goal.getElement() == 0){
+     t.pop();
+     continue;
+    }else if(shortest > goal.getElement()){
+     shortest = goal.getElement();
+     temp = graph.opposite(s,v)
+    }
+   }
+  }
+  uniformCostSearch(s,t,stop);
+  return s;
+ //uniformCostSearch(s,stop);
  }
 
  public void printAllShortestDistances(int ver) throws Exception{
@@ -142,9 +231,17 @@ public class Metro{
   }
  }
 
+ /**
+
+  method which is used to read a file and create stations and call
+  accessory methods to build the graph
+
+ */
+
  public void readMetro(String fileName) throws Exception, IOException{
   BufferedReader metro = new BufferedReader(new FileReader(fileName));
   metro.readLine(); // this read the first read line
+  int count = 0;
   while((line = metro.readLine()) != null){
    // starts from second read line
    token = new StringTokenizer(line, " ");
@@ -168,8 +265,8 @@ public class Metro{
       stop = token.nextToken();
       time = token.nextToken();
       if(getNumber(time) == -1){
-       placeTransfer(getNumber(start), getNumber(stop), getNumber(time));
-       buildGraph(b.get(getNumber(start)),b.get(getNumber(stop)));
+       placeTransfer(getNumber(start), getNumber(stop));
+       buildGraph(b.get(getNumber(start)),b.get(getNumber(stop)), 90);
       }else{
        createRoute(getNumber(start), getNumber(stop), getNumber(time));
        Station s = b.get(getNumber(start));
@@ -190,7 +287,7 @@ public class Metro{
     //metro.printAllShortestDistances(7);
     metro.uniformCostSearch(7,19);
    }catch(Exception e){
-    System.err.println("Not working");
+    e.printStackTrace();
    }
  }
 }
