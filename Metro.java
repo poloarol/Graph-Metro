@@ -167,7 +167,10 @@ public class Metro{
   while(!source.equals(getVertex(b.get(stop)))){
    System.out.println(source.getElement().getStationName());
    source = nextStop(source, getVertex(b.get(stop)));
+   if(source == null)
+    break;
   }
+  System.out.println(b.get(stop).getStationName());
  }
 
  private Stack<Vertex> getAllNeighbours(Vertex<Station> s){
@@ -193,11 +196,6 @@ public class Metro{
 
   while(!sk.isEmpty()){
    source = sk.pop();
-
-   if(source.equals(stop)){
-    closest = source;
-    break;
-   }
 
    if(!source.getElement().isVisited()){
     source.getElement().setVisited(true);
@@ -288,7 +286,7 @@ public class Metro{
     Metro metro = new Metro(args[0]);
     //metro.print();
     //metro.printAllShortestDistances(7);
-    metro.uniformCostSearch(152,240);
+    metro.uniformCostSearch(7,8);
    }catch(Exception e){
     e.printStackTrace();
    }
