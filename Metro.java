@@ -157,7 +157,6 @@ public class Metro{
 
  public void uniformCostSearch(int start, int stop) throws Exception{
 
-
   Stack<Vertex> sk = new LinkedStack<Vertex>();
   Vertex<Station> source = getVertex(b.get(start));
   sk.push(source);
@@ -165,9 +164,8 @@ public class Metro{
   GraphAlgorithms dj = new GraphAlgorithms();
   Map<Vertex<Station>,Integer> result = dj.shortestPathLengths(graph,source);
 
-  Stack<Vertex> neighbours = getAllNeighbours(source);
+  sk = uniformCostSearch(sk, source, getVertex(b.get(stop)));
 
-  uniformCostSearch(sk, neighbours, getVertex(b.get(stop)));
  }
 
  private Stack<Vertex> getAllNeighbours(Vertex<Station> s){
@@ -187,36 +185,32 @@ public class Metro{
   and return a Stack of vertexes to the path
  */
 
- private Stack<Vertex> uniformCostSearch(Stack<Vertex> s, Stack<Vertex> t, Vertex<Station> stop){
-  // while popping the Stack
-  // check to find the shortest path between each adjacent station to the stop
-  // place all its neighbours in the stack and repeat
+ private void uniformCostSearch(Stack<Vertex> s, Vertex<Station> start, Vertex<Station> stop){
   int shortest = 0;
+  Vertex<Station> source = null;
+  Stack<Vertex> sk = getAllNeighbours(start);
 
-  while(!t.isEmpty()){
+  while(!sk.isEmpty()){
+   source = sk.pop();
 
-   Vertex<Station> source = t.pop();
-
-   if(source.equals(goal))
+   if(source.equals(stop))
     break;
 
    GraphAlgorithms dj = new GraphAlgorithms();
    Map<Vertex<Station>,Integer> result = dj.shortestPathLengths(graph,source);
 
    for(Vertex<Station> goal : graph.vertices()){
-    shortest = goal.getElement();
-    if(goal.getElement() == 0){
-     t.pop();
-     continue;
-    }else if(shortest > goal.getElement()){
-     shortest = goal.getElement();
-     temp = graph.opposite(s,v)
+    if(stop.equals(goal)){
+     if(shortest == 0 && result.get(goal) != 90){
+      shortest = result.get(goal);
+     }else if(shortest > result.get(goal) && result.get(goal) != 90){
+      shortest = result.get(goal);
+      source = goal;
+     }
     }
    }
   }
-  uniformCostSearch(s,t,stop);
-  return s;
- //uniformCostSearch(s,stop);
+  s.push(source);
  }
 
  public void printAllShortestDistances(int ver) throws Exception{
