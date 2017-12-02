@@ -164,16 +164,17 @@ public class Metro{
   GraphAlgorithms dj = new GraphAlgorithms();
   Map<Vertex<Station>,Integer> result = dj.shortestPathLengths(graph,source);
 
-  sk = uniformCostSearch(sk, source, getVertex(b.get(stop)));
-
+  while(!source.equals(getVertex(b.get(stop)))){
+   System.out.println(source.getElement().getStationName());
+   source = nextStop(source, getVertex(b.get(stop)));
+  }
  }
 
  private Stack<Vertex> getAllNeighbours(Vertex<Station> s){
   Stack<Vertex> n = new LinkedStack();
   Iterable<Edge<Integer>> e = graph.outgoingEdges(s);
   for(Edge<Integer> v : e){
-   if(v.getElement() != 90)
-    n.push(graph.opposite(s,v));
+   n.push(graph.opposite(s,v));
   }
   return n;
  }
@@ -185,32 +186,40 @@ public class Metro{
   and return a Stack of vertexes to the path
  */
 
- private void uniformCostSearch(Stack<Vertex> s, Vertex<Station> start, Vertex<Station> stop){
+ private Vertex<Station> nextStop(Vertex<Station> start, Vertex<Station> stop){
   int shortest = 0;
-  Vertex<Station> source = null;
+  Vertex<Station> source, closest = null;
   Stack<Vertex> sk = getAllNeighbours(start);
 
   while(!sk.isEmpty()){
    source = sk.pop();
 
-   if(source.equals(stop))
+   if(source.equals(stop)){
+    closest = source;
     break;
+   }
 
-   GraphAlgorithms dj = new GraphAlgorithms();
-   Map<Vertex<Station>,Integer> result = dj.shortestPathLengths(graph,source);
+   if(!source.getElement().isVisited()){
+    source.getElement().setVisited(true);
 
-   for(Vertex<Station> goal : graph.vertices()){
-    if(stop.equals(goal)){
-     if(shortest == 0 && result.get(goal) != 90){
-      shortest = result.get(goal);
-     }else if(shortest > result.get(goal) && result.get(goal) != 90){
-      shortest = result.get(goal);
-      source = goal;
+    GraphAlgorithms dj = new GraphAlgorithms();
+    Map<Vertex<Station>,Integer> result = dj.shortestPathLengths(graph, source);
+
+    for(Vertex<Station> goal : graph.vertices()){
+     if(goal.equals(stop)){
+      if(shortest == 0){
+       closest = source;
+       shortest = result.get(goal);
+      }else if(shortest > result.get(goal)){
+       shortest = result.get(goal);
+       closest = source;
+      }
      }
     }
    }
   }
-  s.push(source);
+  //System.out.println(closest.getElement().getStationName());
+  return closest;
  }
 
  public void printAllShortestDistances(int ver) throws Exception{
@@ -260,7 +269,7 @@ public class Metro{
       time = token.nextToken();
       if(getNumber(time) == -1){
        placeTransfer(getNumber(start), getNumber(stop));
-       buildGraph(b.get(getNumber(start)),b.get(getNumber(stop)), 90);
+       buildGraph(b.get(getNumber(start)),b.get(getNumber(stop)), 0);
       }else{
        createRoute(getNumber(start), getNumber(stop), getNumber(time));
        Station s = b.get(getNumber(start));
@@ -279,7 +288,7 @@ public class Metro{
     Metro metro = new Metro(args[0]);
     //metro.print();
     //metro.printAllShortestDistances(7);
-    metro.uniformCostSearch(7,19);
+    metro.uniformCostSearch(152,240);
    }catch(Exception e){
     e.printStackTrace();
    }

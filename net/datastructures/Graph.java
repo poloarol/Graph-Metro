@@ -109,4 +109,6 @@ public interface Graph<V,E> {
 
   /** Removes an edge from the graph. */
   void removeEdge(Edge<E> e) throws IllegalArgumentException;
+
+ // void markVertex(boolean mark)
 }

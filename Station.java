@@ -5,6 +5,7 @@ public class Station{
  private String name;
  private ArrayList<Station> transferList;
  private Map<String, Route> routes;
+ private boolean visit;
 
  public Station(int number, String name){
   station = number;
@@ -12,6 +13,7 @@ public class Station{
   transfer = 0;
   transferList = new ArrayList<Station>();
   routes = new HashMap<String, Route>();
+  visit = false;
  }
 
  public int getStationNumber(){
@@ -66,6 +68,14 @@ public class Station{
 
  public void addRoute(Route route){
   routes.put(route.getDestination().name, route);
+ }
+
+ public void setVisited(boolean t){
+  visit = t;
+ }
+
+ public boolean isVisited(){
+  return visit;
  }
 
  @Override
