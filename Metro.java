@@ -50,10 +50,9 @@ public class Metro{
 
  private void createRoute(int stationStart, int stationStop, int secs){
   int i = 0;
-  depart = b.get(stationStart);
-  end = b.get(stationStop);
-  transit = new Route(depart,end,secs);
+  transit = new Route(b.get(stationStart),b.get(stationStop),secs);
   a.add(i,transit);
+  b.get(stationStart).addRoute(transit);
   i++;
  }
 
@@ -220,6 +219,55 @@ public class Metro{
   return closest;
  }
 
+ public void brokenStation(int start, int stop, int broken) throws Exception{
+
+  Stack<Vertex> sk = new LinkedStack<Vertex>();
+  Vertex<Station> source = getVertex(b.get(start));
+  sk.push(source);
+
+  GraphAlgorithms dj = new GraphAlgorithms();
+  Map<Vertex<Station>,Integer> result = dj.shortestPathLengths(graph,source);
+
+  while(!source.equals(getVertex(b.get(stop)))){
+   System.out.println(source.getElement().getStationName());
+   source = brokenNextStop(source, getVertex(b.get(stop)), getVertex(b.get(stop)));
+   if(source == null)
+    break;
+  }
+  System.out.println(b.get(stop).getStationName());
+
+ }
+
+ private Vertex<Station> brokenNextStop(Vertex<Station> start, Vertex<Station> stop, Vertex<Station> broken){
+  int shortest = 0;
+  Vertex<Station> source, closest = null;
+  Stack<Vertex> sk = getAllNeighbours(start);
+
+  while(!sk.isEmpty()){
+   source = sk.pop();
+
+   if(!source.getElement().isVisited() && !source.equals(broken)){
+    source.getElement().setVisited(true);
+
+    GraphAlgorithms dj = new GraphAlgorithms();
+    Map<Vertex<Station>,Integer> result = dj.shortestPathLengths(graph, source);
+
+    for(Vertex<Station> goal : graph.vertices()){
+     if(goal.equals(stop)){
+      if(shortest == 0){
+       closest = source;
+       shortest = result.get(goal);
+      }else if(shortest > result.get(goal)){
+       shortest = result.get(goal);
+       closest = source;
+      }
+     }
+    }
+   }
+  }
+  return closest;
+ }
+
  public void printAllShortestDistances(int ver) throws Exception{
   Station s = b.get(ver);
   Vertex<Station> vSource = getVertex(s);
@@ -240,7 +288,7 @@ public class Metro{
  */
 
  public void readMetro(String fileName) throws Exception, IOException{
-  BufferedReader metro = new BufferedReader(new FileReader(fileName));
+  BufferedReader metro = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), "UTF8"));
   metro.readLine(); // this read the first read line
   int count = 0;
   while((line = metro.readLine()) != null){
@@ -267,16 +315,25 @@ public class Metro{
       time = token.nextToken();
       if(getNumber(time) == -1){
        placeTransfer(getNumber(start), getNumber(stop));
-       buildGraph(b.get(getNumber(start)),b.get(getNumber(stop)), 0);
+       buildGraph(b.get(getNumber(start)),b.get(getNumber(stop)), 90);
       }else{
        createRoute(getNumber(start), getNumber(stop), getNumber(time));
-       Station s = b.get(getNumber(start));
        buildGraph(b.get(getNumber(start)),b.get(getNumber(stop)),getNumber(time));
       }
      }
     }
    }
   }
+
+ public void sameLine(int i) throws Exception{
+  ArrayList<Station> st = b.get(i).getDestination();
+  System.out.println(b.get(i).getStationName());
+  for(Station t : st){
+   System.out.println(t.getStationName());
+  }
+ }
+
+
 
  public static void main(String[] args){
    if(args.length < 1){
@@ -286,7 +343,9 @@ public class Metro{
     Metro metro = new Metro(args[0]);
     //metro.print();
     //metro.printAllShortestDistances(7);
-    metro.uniformCostSearch(7,8);
+    //metro.uniformCostSearch(155,77);
+    //metro.brokenStation(155, 77, 138);
+    metro.sameLine(7);
    }catch(Exception e){
     e.printStackTrace();
    }

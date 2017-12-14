@@ -1,18 +1,19 @@
-import java.util.*;
+import net.datastructures.*;
+import java.util.Hashtable;
 
 public class Station{
- private int station, transfer;
+ private int station, transfer, counts, countr;
  private String name;
  private ArrayList<Station> transferList;
- private Map<String, Route> routes;
+ private Hashtable<String, Route> routes;
  private boolean visit;
 
  public Station(int number, String name){
   station = number;
   this.name = name;
-  transfer = 0;
+  transfer = counts = countr = 0;
   transferList = new ArrayList<Station>();
-  routes = new HashMap<String, Route>();
+  routes = new Hashtable<String, Route>();
   visit = false;
  }
 
@@ -39,7 +40,8 @@ public class Station{
  }
 
  public void addTransfer(Station station){
-  transferList.add(station);
+  transferList.add(counts, station);
+  counts++;
  }
 
  public boolean equals(Station station){
@@ -53,16 +55,18 @@ public class Station{
  public Route getRouteTo(String destination){
   if(routes.containsKey(destination)){
    return routes.get(destination);
-  }else{
-   throw new NoSuchElementException("Missing Connection: " +  " to " + "destination");
-  }
+  }/*else{
+   //throw new NoSuchElementException("Missing Connection: " +  " to " + "destination");
+  }*/
+  return null;
  }
 
  public ArrayList<Station> getDestination(){
   ArrayList<Station> destination = new ArrayList<Station>();
   for(Route routes : routes.values()){
-   destination.add(routes.getDestination());
+   destination.add(countr, routes.getDestination());
   }
+  countr++;
   return destination;
  }
 
